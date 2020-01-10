@@ -11,7 +11,12 @@
 #include <string>
 #include <vector>
 #include <regex>
+#include <algorithm>
+#include <iostream>
 
+
+using std::cout;
+using std::endl;
 using std::string;
 using std::vector;
 
@@ -42,9 +47,31 @@ bool find_s_in_string(std::string &s, std::string &string)
 	return string.find(s) != std::string::npos;
 }
 
+std::vector<string> split_string(const string& in, const string& delim)
+{
+	std::regex re{ delim };
+	return std::vector<string> {
+		std::sregex_token_iterator(in.begin(), in.end(), re, -1),
+			std::sregex_token_iterator()
+	};
+}
+
+
 Schema my_parse(std::string str)
 {
 	Schema schema;
+
+	std::vector<string> commands = split_string(str, " ");
+
+	//for (auto command : commands) {
+	//	auto i = std::find(schema.param_vector.begin(), schema.param_vector.end(), command);
+	//	if (i == schema.param_vector.end()) {
+	//		cout << "can't recognize this command: " << command << endl;
+	//		break;
+	//	}
+	//	if 
+	//	//if(std::find())
+	//}
 
 	for (auto s : schema.param_vector) {
 		if (find_s_in_string(s, str)) {
@@ -57,16 +84,6 @@ Schema my_parse(std::string str)
 	return schema;
 }
 
-std::vector<string> split_string(const string& in, const string& delim)
-{
-	//用delim指定的正则表达式将字符串in分割，返回分割后的字符串数组
-	//delim 分割字符串的正则表达式
-	std::regex re{ delim };
-	return std::vector<string> {
-		std::sregex_token_iterator(in.begin(), in.end(), re, -1),
-			std::sregex_token_iterator()
-	};
-}
 
 //1. 解析器会首先验证参数列表是否与参数结构相匹配。
 //2. 然后，程序就可以向参数解析器查询每个参数的值（根据参数的标记名）。
@@ -75,9 +92,11 @@ std::vector<string> split_string(const string& in, const string& delim)
 // 感觉还是要用一个正则表达式来做，先将输入进行分割，再判断输出vector中是啥
 // 或者用循环的方式来做，找到“-”，再判断后面的字母
 
-Schema schema;
 
-TEST(seperate_string_with_seperators) {
+
+
+
+TEST(split_string_with_seperators) {
 	std::vector<string> result = split_string("-I -p 8800 -d desktop\cr", " ");
 	EXPECT_EQ(result[0], "-I");
 	EXPECT_EQ(result[1], "-p");
@@ -102,27 +121,22 @@ TEST(if_input_contain_I_schema_I_should_be_true) {
 	EXPECT_TRUE(my_parse(input).I);
 }
 
+Schema schema;
+
 TEST(my_parse_should_return_a_schema_according_to_input) {
 	EXPECT_EQ(my_parse("test string"), schema);
 }
 
-
-TEST(schema_should_have_3_parameters) {
+TEST(test_default_value_and_type_of_data_memeber_schema_class)
+{
 	EXPECT_EQ(schema.param_num, 3);
-}
 
-TEST(schema,I) {
 	EXPECT_EQ(typeid(schema.I), typeid(bool));
 	EXPECT_EQ(schema.I, false);
-}
 
-TEST(schema,p) {
 	EXPECT_EQ(typeid(schema.p), typeid(int));
 	EXPECT_EQ(schema.p, 8800);
-}
 
-TEST(schema, d)
-{
 	EXPECT_EQ(typeid(schema.d), typeid(std::string));
 	EXPECT_EQ(schema.d, "desktop\cr");
 }
